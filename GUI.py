@@ -27,18 +27,6 @@ class Grid:
         self.update_model()
         self.selected = None
         self.win = win
-        self.generate_board()
-    
-    def generate_board(self):
-        empty_board = [[0 for _ in range(9)] for _ in range(9)]
-        for i in range(0,9.3):
-            self.fill_diagonal(empty_board, i, i)
-
-        self.board = empty_board
-        self.update_model()
-        self.solve()
-
-        num_to_remove = 30,50
 
     def update_model(self):
         self.model = [[self.cubes[i][j].value for j in range(self.cols)] for i in range(self.rows)]
