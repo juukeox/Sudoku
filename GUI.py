@@ -1,21 +1,15 @@
 # GUI.py
 import pygame
 import time
+import numpy
+from dokusan import generators
 pygame.font.init()
 
 
 class Grid:
-    board = [
-        [7, 8, 0, 4, 0, 0, 1, 2, 0],
-        [6, 0, 0, 0, 7, 5, 0, 0, 9],
-        [0, 0, 0, 6, 0, 1, 0, 7, 8],
-        [0, 0, 7, 0, 4, 0, 2, 6, 0],
-        [0, 0, 1, 0, 5, 0, 9, 3, 0],
-        [9, 0, 4, 0, 6, 0, 0, 0, 5],
-        [0, 7, 0, 3, 0, 0, 0, 1, 2],
-        [1, 2, 0, 0, 0, 7, 4, 0, 0],
-        [0, 4, 9, 2, 0, 6, 0, 0, 7]
-    ]
+
+
+    board = (numpy.array(list(str(generators.random_sudoku(avg_rank=150))))).reshape((9,9))
 
     def __init__(self, rows, cols, width, height, win):
         self.rows = rows
@@ -50,20 +44,25 @@ class Grid:
         self.cubes[row][col].set_temp(val)
 
     def draw(self):
-        # Draw Grid Lines
-        gap = self.width / 9
-        for i in range(self.rows+1):
-            if i % 3 == 0 and i != 0:
-                thick = 4
-            else:
-                thick = 1
-            pygame.draw.line(self.win, (0,0,0), (0, i*gap), (self.width, i*gap), thick)
-            pygame.draw.line(self.win, (0, 0, 0), (i * gap, 0), (i * gap, self.height), thick)
+        fnt = pygame.font.SysFont("comicsans", 40)
 
-        # Draw Cubes
+        gap = self.width / 9
+
         for i in range(self.rows):
             for j in range(self.cols):
-                self.cubes[i][j].draw(self.win)
+                x = j * gap
+                y = i * gap
+
+        pygame.draw.rect(self.win, (255, 255, 255), (x, y, gap, gap))
+        if self.cubes[i][j].value != 0:
+            text = fnt.render(str(self.cubes[i][j].value), 1, (0, 0, 0))
+            self.win.blit(text, (x + (gap / 2 - text.get_width() / 2), y + (gap / 2 - text.get_height() / 2)))
+        elif self.cubes[i][j].temp != 0:
+            text = fnt.render(str(self.cubes[i][j].temp), 1, (128, 128, 128))
+            self.win.blit(text, (x + 5, y + 5))
+
+        if self.cubes[i][j].selected:
+            pygame.draw.rect(self.win, (255, 0, 0), (x, y, gap, gap), 3)
 
     def select(self, row, col):
         # Reset all other
@@ -167,6 +166,7 @@ class Cube:
         x = self.col * gap
         y = self.row * gap
 
+        pygame.draw.rect(win, (255, 255, 255), (x, y, gap, gap))
         if self.temp != 0 and self.value == 0:
             text = fnt.render(str(self.temp), 1, (128,128,128))
             win.blit(text, (x+5, y+5))
