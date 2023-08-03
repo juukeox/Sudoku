@@ -8,8 +8,14 @@ pygame.font.init()
 
 class Grid:
 
+    def generate_new_board():
+        board = numpy.array(list(str(generators.random_sudoku(avg_rank=150)))).reshape((9,9))
+        board_list = []
+        for row in board:
+          board_list.append([int(n) for n in row])
+        return board_list
 
-    board = (numpy.array(list(str(generators.random_sudoku(avg_rank=150))))).reshape((9,9))
+    board = generate_new_board()
 
     def __init__(self, rows, cols, width, height, win):
         self.rows = rows
@@ -44,25 +50,20 @@ class Grid:
         self.cubes[row][col].set_temp(val)
 
     def draw(self):
-        fnt = pygame.font.SysFont("comicsans", 40)
-
+        # Draw Grid Lines
         gap = self.width / 9
+        for i in range(self.rows+1):
+            if i % 3 == 0 and i != 0:
+                thick = 4
+            else:
+                thick = 1
+            pygame.draw.line(self.win, (0,0,0), (0, i*gap), (self.width, i*gap), thick)
+            pygame.draw.line(self.win, (0, 0, 0), (i * gap, 0), (i * gap, self.height), thick)
 
+        # Draw Cubes
         for i in range(self.rows):
             for j in range(self.cols):
-                x = j * gap
-                y = i * gap
-
-        pygame.draw.rect(self.win, (255, 255, 255), (x, y, gap, gap))
-        if self.cubes[i][j].value != 0:
-            text = fnt.render(str(self.cubes[i][j].value), 1, (0, 0, 0))
-            self.win.blit(text, (x + (gap / 2 - text.get_width() / 2), y + (gap / 2 - text.get_height() / 2)))
-        elif self.cubes[i][j].temp != 0:
-            text = fnt.render(str(self.cubes[i][j].temp), 1, (128, 128, 128))
-            self.win.blit(text, (x + 5, y + 5))
-
-        if self.cubes[i][j].selected:
-            pygame.draw.rect(self.win, (255, 0, 0), (x, y, gap, gap), 3)
+                self.cubes[i][j].draw(self.win)
 
     def select(self, row, col):
         # Reset all other
@@ -166,7 +167,6 @@ class Cube:
         x = self.col * gap
         y = self.row * gap
 
-        pygame.draw.rect(win, (255, 255, 255), (x, y, gap, gap))
         if self.temp != 0 and self.value == 0:
             text = fnt.render(str(self.temp), 1, (128,128,128))
             win.blit(text, (x+5, y+5))
@@ -342,3 +342,4 @@ def main():
 
 main()
 pygame.quit()
+
